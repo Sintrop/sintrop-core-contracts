@@ -6,11 +6,11 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 var fs = require("fs");
-// const educationCenterDeploy = require("../migrations/1_educationCenter.deploy.js");
-// const sintropAppStoreDeploy = require("../migrations/2_sintropAppStore.deploy.js");
-// const globalPlantCatalogDeploy = require("../migrations/3_globalPlantCatalog.js");
-// const rcTestRewardDeploy = require("../migrations/4_rcTestReward.js");
-// const humansPeaceTreatyDeploy = require("../migrations/5_humansPeaceTreaty.js");
+const educationCenterDeploy = require("../migrations/1_educationCenter.deploy.js");
+const sintropAppStoreDeploy = require("../migrations/2_sintropAppStore.deploy.js");
+const globalPlantCatalogDeploy = require("../migrations/3_globalPlantCatalog.js");
+const humansPeaceTreatyDeploy = require("../migrations/5_humansPeaceTreaty.js");
+const whitepaperDeploy = require("../migrations/6_whitepaperCenter.js");
 
 const sleep = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -53,12 +53,12 @@ async function main() {
   // await educationCenterDeploy();
   // await sintropAppStoreDeploy();
   // await globalPlantCatalogDeploy();
-  // await rcTestRewardDeploy();
   // await humansPeaceTreatyDeploy();
+  // await whitepaperDeploy();
 
 //  await afterDeploy();
 
-//  showDeployedAddress();
+  // showDeployedAddress();
 }
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
