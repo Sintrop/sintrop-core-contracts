@@ -228,4 +228,103 @@ describe("SintropAppStore", function () {
       expect(await sintropAppStore.isImpactApp(1)).to.be.false;
     });
   });
+
+  describe("Updating an ImpactApp", function () {
+    const initialData = {
+      name: "Carbon Tracker v1",
+      description: "Initial release for tracking carbon credits.",
+      icon: "http://example.com/icon_v1.png",
+      repoUrl: "http://github.com/carbontracker/v1",
+      externalLink: "http://carbontracker.io",
+      contractAddresses: [],
+    };
+
+    const updatedData = {
+      name: "Carbon Tracker v1.1",
+      description: "A new and improved description after user feedback.",
+      icon: "http://example.com/icon_v1.1.png",
+      repoUrl: "http://github.com/carbontracker/v1.1",
+      externalLink: "http://carbontracker.dev",
+    };
+
+    beforeEach(async function () {
+      initialData.contractAddresses = [ethers.Wallet.createRandom().address];
+
+      await sintropAppStore.connect(owner).registerImpactApp(
+        initialData.name,
+        initialData.description,
+        initialData.icon,
+        initialData.repoUrl,
+        initialData.externalLink,
+        initialData.contractAddresses
+      );
+    });
+
+    it("Should allow the publisher to update their own app's data", async function () {
+      await expect(
+        sintropAppStore.connect(owner).updateImpactApp(
+          1,
+          updatedData.name,
+          updatedData.description,
+          updatedData.icon,
+          updatedData.repoUrl,
+          updatedData.externalLink
+        )
+      )
+        .to.emit(sintropAppStore, "ImpactAppUpdated")
+        .withArgs(1);
+
+      const appAfterUpdate = await sintropAppStore.getImpactApp(1);
+
+      expect(appAfterUpdate.name).to.equal(updatedData.name);
+      expect(appAfterUpdate.description).to.equal(updatedData.description);
+      expect(appAfterUpdate.icon).to.equal(updatedData.icon);
+      expect(appAfterUpdate.repositoryUrl).to.equal(updatedData.repoUrl);
+      expect(appAfterUpdate.externalLink).to.equal(updatedData.externalLink);
+
+      expect(appAfterUpdate.id).to.equal(1);
+      expect(appAfterUpdate.publisher).to.equal(owner.address);
+      expect(appAfterUpdate.positiveVotes).to.equal(0);
+      expect(appAfterUpdate.contractAddresses).to.deep.equal(initialData.contractAddresses);
+    });
+
+    it("Should revert if a non-publisher tries to update an app", async function () {
+      await expect(
+        sintropAppStore.connect(addr1).updateImpactApp(
+          1,
+          updatedData.name,
+          updatedData.description,
+          updatedData.icon,
+          updatedData.repoUrl,
+          updatedData.externalLink
+        )
+      ).to.be.revertedWith("Only the publisher can update the app.");
+    });
+
+    it("Should revert when trying to update an app with a non-existent ID", async function () {
+      await expect(
+        sintropAppStore.connect(owner).updateImpactApp(
+          999,
+          updatedData.name,
+          updatedData.description,
+          updatedData.icon,
+          updatedData.repoUrl,
+          updatedData.externalLink
+        )
+      ).to.be.revertedWith("Invalid ImpactApp ID.");
+    });
+
+    it("Should revert if trying to update with invalid data (e.g., empty name)", async function () {
+      await expect(
+        sintropAppStore.connect(owner).updateImpactApp(
+          1,
+          "",
+          updatedData.description,
+          updatedData.icon,
+          updatedData.repoUrl,
+          updatedData.externalLink
+        )
+      ).to.be.revertedWith("Name must be between 1 and 100 characters.");
+    });
+  });  
 });

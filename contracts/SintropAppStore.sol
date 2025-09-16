@@ -47,6 +47,9 @@ contract SintropAppStore {
   /// @notice Mapping of `impactAppId => voterAddress => VoteType` to track each wallet's votes.
   mapping(uint256 => mapping(address => VoteType)) public impactAppVotes;
 
+  /// @notice Mapping of `publisherAddress => impactAppId` to enforce one app per publisher.
+  mapping(address => uint256) public publisherToAppId;
+
   // --- Functions ---
 
   /**
@@ -68,6 +71,8 @@ contract SintropAppStore {
     string memory _externalLink,
     address[] memory _contractAddresses
   ) public {
+    require(publisherToAppId[msg.sender] == 0, "Publisher can only register one ImpactApp.");
+
     // Input validation
     require(bytes(_name).length > 0 && bytes(_name).length <= 100, "Name must be between 1 and 100 characters.");
     require(
@@ -101,9 +106,62 @@ contract SintropAppStore {
       positiveVotes: 0,
       negativeVotes: 0
     });
+    
+    publisherToAppId[msg.sender] = newImpactAppId;
 
     emit ImpactAppRegistered(newImpactAppId, _name, msg.sender);
   }
+
+  /**
+   * @notice Updates the information of a registered ImpactApp.
+   * @dev Only the original publisher of the ImpactApp can call this function. String fields have the same validation as registration.
+   * @param _impactAppId The ID of the ImpactApp to update.
+   * @param _name New name for the application.
+   * @param _description New description for the application.
+   * @param _icon New icon URL.
+   * @param _repositoryUrl New repository URL.
+   * @param _externalLink New external link.
+   */
+  function updateImpactApp(
+      uint256 _impactAppId,
+      string memory _name,
+      string memory _description,
+      string memory _icon,
+      string memory _repositoryUrl,
+      string memory _externalLink
+  ) public {
+      require(_impactAppId > 0 && _impactAppId <= impactAppsCount, "Invalid ImpactApp ID.");
+
+      ImpactApp storage appToUpdate = impactApps[_impactAppId];
+
+      require(appToUpdate.publisher == msg.sender, "Only the publisher can update the app.");
+
+      // Input validation
+      require(bytes(_name).length > 0 && bytes(_name).length <= 100, "Name must be between 1 and 100 characters.");
+      require(
+          bytes(_description).length > 0 && bytes(_description).length <= 1000,
+          "Description must be between 1 and 1000 characters."
+      );
+      require(bytes(_icon).length > 0 && bytes(_icon).length <= 150, "Icon must be between 1 and 150 characters.");
+      require(
+          bytes(_repositoryUrl).length > 0 && bytes(_repositoryUrl).length <= 200,
+          "Repository URL must be between 1 and 200 characters."
+      );
+      require(
+          bytes(_externalLink).length > 0 && bytes(_externalLink).length <= 200,
+          "External link must be between 1 and 200 characters."
+      );
+
+      // Update the app's fields
+      appToUpdate.name = _name;
+      appToUpdate.description = _description;
+      appToUpdate.icon = _icon;
+      appToUpdate.repositoryUrl = _repositoryUrl;
+      appToUpdate.externalLink = _externalLink;
+
+      emit ImpactAppUpdated(_impactAppId);
+  }
+
 
   /**
    * @notice Allows a wallet to vote positively or negatively on a ImpactApp's socio-environmental impact.
@@ -178,6 +236,10 @@ contract SintropAppStore {
   /// @param name The name of the ImpactApp.
   /// @param publisher The wallet address that registered the ImpactApp.
   event ImpactAppRegistered(uint256 indexed impactAppId, string name, address indexed publisher);
+  
+  /// @notice Emitted when a ImpactApp's data is updated.
+  /// @param impactAppId The unique ID of the updated ImpactApp.
+  event ImpactAppUpdated(uint256 indexed impactAppId);
 
   /// @notice Emitted when a wallet votes on a ImpactApp.
   /// @param impactAppId The ID of the ImpactApp voted on.
