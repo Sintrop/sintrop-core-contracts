@@ -56,11 +56,11 @@ async function main() {
   // await globalPlantCatalogDeploy();
   // await humansPeaceTreatyDeploy();
   // await whitepaperDeploy();
-  // await rcMarketDeploy();
+  // await rcMarketDeploy();
 
 //  await afterDeploy();
 
-  // showDeployedAddress();
+  showDeployedAddress();
 }
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
