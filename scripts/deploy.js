@@ -11,6 +11,7 @@ const sintropAppStoreDeploy = require("../migrations/2_sintropAppStore.deploy.js
 const globalPlantCatalogDeploy = require("../migrations/3_globalPlantCatalog.js");
 const humansPeaceTreatyDeploy = require("../migrations/5_humansPeaceTreaty.js");
 const whitepaperDeploy = require("../migrations/6_whitepaperCenter.js");
+const rcMarketDeploy = require("../migrations/7_rcMarket.js");
 
 const sleep = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -55,10 +56,11 @@ async function main() {
   // await globalPlantCatalogDeploy();
   // await humansPeaceTreatyDeploy();
   // await whitepaperDeploy();
+  // await rcMarketDeploy();
 
 //  await afterDeploy();
 
-  // showDeployedAddress();
+  showDeployedAddress();
 }
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
